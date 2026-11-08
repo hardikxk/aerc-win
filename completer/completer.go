@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"syscall"
 
 	"git.sr.ht/~rjarry/aerc/lib/format"
 	"git.sr.ht/~rjarry/aerc/lib/log"
@@ -96,7 +95,7 @@ func (c *Completer) completeAddress(ctx context.Context, s string) ([]opt.Comple
 		return nil, "", fmt.Errorf("stderr: %w", err)
 	}
 	// reset the process group id to allow killing all its children
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setProcessGroup(cmd)
 	if err := cmd.Start(); err != nil {
 		return nil, "", fmt.Errorf("cmd start: %w", err)
 	}
@@ -110,7 +109,7 @@ func (c *Completer) completeAddress(ctx context.Context, s string) ([]opt.Comple
 	if err != nil {
 		// make sure to kill the process *and* all its children
 		//nolint:errcheck // who cares?
-		syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		killProcessGroup(cmd)
 		log.Warnf("command %s killed: %s", cmd, err)
 	}
 	if err != nil && !errors.Is(err, tooManyLines) {

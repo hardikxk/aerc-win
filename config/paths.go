@@ -1,7 +1,9 @@
 package config
 
 import (
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"git.sr.ht/~rjarry/aerc/lib/xdg"
@@ -27,6 +29,15 @@ func buildDefaultDirs() []string {
 		if v != "" {
 			defaultDirs = append(defaultDirs, xdg.ExpandHome(v, "aerc"))
 		}
+	}
+
+	if exe, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exe)
+		defaultDirs = append(defaultDirs,
+			filepath.ToSlash(exeDir),
+			filepath.ToSlash(filepath.Join(exeDir, "share", "aerc")),
+			filepath.ToSlash(filepath.Join(exeDir, "config")),
+		)
 	}
 
 	// Trim null chars inserted post-build by systems like Conda

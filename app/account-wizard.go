@@ -14,7 +14,6 @@ import (
 
 	"github.com/emersion/go-message/mail"
 	"github.com/go-ini/ini"
-	"golang.org/x/sys/unix"
 
 	"git.sr.ht/~rjarry/aerc/config"
 	"git.sr.ht/~rjarry/aerc/lib/autoconfig"
@@ -452,7 +451,7 @@ func (wizard *AccountWizard) finish(tutorial bool) {
 			err = fmt.Errorf("%s: Not a directory", s.Name())
 		}
 		if err == nil {
-			err = unix.Access(path, unix.X_OK)
+			err = checkAccessExecutable(path)
 		}
 		if err != nil {
 			wizard.errorFor(wizard.sourceServer, err)
@@ -466,7 +465,7 @@ func (wizard *AccountWizard) finish(tutorial bool) {
 			err = fmt.Errorf("%s: Not a regular file", s.Name())
 		}
 		if err == nil {
-			err = unix.Access(path, unix.X_OK)
+			err = checkAccessExecutable(path)
 		}
 		if err != nil {
 			wizard.errorFor(wizard.outgoingServer, err)

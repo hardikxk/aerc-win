@@ -11,6 +11,7 @@ import (
 	"path"
 	"reflect"
 	"regexp"
+	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -406,6 +407,9 @@ func (a *AccountConfig) ParsePgpErrorLevel(sec *ini.Section, key *ini.Key) (int,
 // checkConfigPerms checks for too open permissions
 // printing the fix on stdout and returning an error
 func checkConfigPerms(filename string) error {
+	if runtime.GOOS == "windows" {
+		return nil
+	}
 	info, err := os.Stat(filename)
 	if err != nil {
 		return err

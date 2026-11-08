@@ -125,13 +125,7 @@ func Suspend() error {
 	if atomic.SwapUint32(&state.suspending, 0) != 0 {
 		err = state.vx.Suspend()
 		if err == nil {
-			sigcont := make(chan os.Signal, 1)
-			signal.Notify(sigcont, syscall.SIGCONT)
-			err = syscall.Kill(0, syscall.SIGTSTP)
-			if err == nil {
-				<-sigcont
-			}
-			signal.Reset(syscall.SIGCONT)
+			err = suspendProcess()
 			err = state.vx.Resume()
 			state.content.Draw(state.ctx)
 			state.vx.Render()
