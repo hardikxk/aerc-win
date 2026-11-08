@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.25'
+          check-latest: true
+
+      - name: Build aerc binary
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { 'dev' }
+          $date = (Get-Date).ToString("yyyy-MM-dd")
+          $ldflags = "-s -w -X main.Version=$tag -X main.Date=$date"
+          go build -trimpath -ldflags="$ldflags" -o aerc.exe .
+
+      - name: Package Windows distribution
+        shell: pwsh
+        run: |
+          $dist = "aerc-windows-amd64"
+          New-Item -ItemType Directory -Path $dist | Out-Null
+          Copy-Item "aerc.exe" -Destination $dist/
+          Copy-Item "README.md" -Destination $dist/
+          Copy-Item "LICENSE" -Destination $dist/
+          
+          # Include default configurations and stylesets
+          if (Test-Path "config") {
+              Copy-Item "config" -Destination "$dist/config" -Recurse
+          }
+          
+          Compress-Archive -Path "$dist/*" -DestinationPath "$dist.zip" -Force
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            aerc.exe
+            aerc-windows-amd64.zip
+          generate_release_notes: true
+

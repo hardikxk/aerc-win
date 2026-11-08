@@ -7,23 +7,29 @@
 
 [aerc](https://sr.ht/~rjarry/aerc/) is an email client for your terminal.
 
-This is a fork of [the original aerc](https://git.sr.ht/~sircmpwn/aerc)
-by Drew DeVault.
+This is a Windows-compatible fork of [Robin Jarry's fork](https://git.sr.ht/~rjarry/aerc)
+of [the original aerc](https://git.sr.ht/~sircmpwn/aerc) by Drew DeVault.
 
 A short demonstration can be found on [https://aerc-mail.org/](https://aerc-mail.org/)
 
 Join the IRC channel: [#aerc on irc.libera.chat](http://web.libera.chat/?channels=aerc)
 for end-user support, and development.
 
+For windows specific support and discussion: Use the Discussions section of this repo on GitHub.
+
 ## Usage
 
 On its first run, aerc will copy the default config files to `~/.config/aerc`
-on Linux or `~/Library/Preferences/aerc` on MacOS (or `$XDG_CONFIG_HOME/aerc` if set)
-and show the account configuration wizard.
+on Linux, `~/Library/Preferences/aerc` on macOS, or `%APPDATA%\aerc` on Windows
+(or `$XDG_CONFIG_HOME/aerc` if set) and show the account configuration wizard.
 
 If you redirect stdout to a file, logging output will be written to that file:
 
     $ aerc > log
+
+On Windows, run in Windows Terminal, PowerShell, or cmd.exe:
+
+    > aerc.exe
 
 Note that the default HTML filter additionally needs `w3m` to be installed
 along with optional `unshare` (from `util-linux`) or `socksify` (from
@@ -84,6 +90,10 @@ Install the dependencies:
 Then compile aerc:
 
     $ gmake
+
+On Windows (PowerShell / Command Prompt):
+
+    > go build -trimpath -o aerc.exe .
 
 aerc optionally supports notmuch. To enable it, you need to have a recent
 version of [notmuch](https://notmuchmail.org/#index7h2), including the header
