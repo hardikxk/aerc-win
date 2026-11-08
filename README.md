@@ -1,21 +1,22 @@
-# aerc
+# aerc-win
+
 
 ![logo](https://git.sr.ht/~rjarry/aerc/blob/master/contrib/logo.svg)
 
-[![builds.sr.ht status](https://builds.sr.ht/~rjarry/aerc.svg)](https://builds.sr.ht/~rjarry/aerc)
-[![GitHub macOS CI status](https://github.com/rjarry/aerc/actions/workflows/macos.yml/badge.svg)](https://github.com/rjarry/aerc/actions/workflows/macos.yml)
+[![Release](https://github.com/hardikxk/aerc-win/actions/workflows/release.yml/badge.svg)](https://github.com/hardikxk/aerc-win/actions/workflows/release.yml)
 
-[aerc](https://sr.ht/~rjarry/aerc/) is an email client for your terminal.
+**aerc-win** brings native Windows support to [aerc](https://sr.ht/~rjarry/aerc/), the terminal email
+client originally created by Drew DeVault and maintained by Robin Jarry.
 
-This is a Windows-compatible fork of [Robin Jarry's fork](https://git.sr.ht/~rjarry/aerc)
+This is forked from [Robin Jarry's fork](https://git.sr.ht/~rjarry/aerc)
 of [the original aerc](https://git.sr.ht/~sircmpwn/aerc) by Drew DeVault.
 
 A short demonstration can be found on [https://aerc-mail.org/](https://aerc-mail.org/)
 
+For windows specific support and discussion: Use the Discussions section of this repo on GitHub.
+
 Join the IRC channel: [#aerc on irc.libera.chat](http://web.libera.chat/?channels=aerc)
 for end-user support, and development.
-
-For windows specific support and discussion: Use the Discussions section of this repo on GitHub.
 
 ## Usage
 
@@ -67,6 +68,7 @@ User contributions and integration with external tools:
 
 Recent versions of aerc are available on:
 
+- [Windows: Download the latest version of `aerc.exe` from GitHub releases page](https://github.com/hardikxk/aerc-win/releases)
 - [Alpine](https://pkgs.alpinelinux.org/packages?name=aerc)
 - [Arch](https://archlinux.org/packages/extra/x86_64/aerc/)
 - [Debian](https://tracker.debian.org/pkg/aerc)
@@ -140,8 +142,14 @@ priority than the XDG locations but higher than the fixed paths.
 
 ## Contributing
 
-Anyone can contribute to aerc. Please refer to [the contribution
-guidelines](https://git.sr.ht/~rjarry/aerc/tree/master/item/CONTRIBUTING.md)
+Anyone is welcome to contribute to this fork of aerc. Follow basic Open Source
+contibutions ethics. Open an Issue or Pull Request here on GitHub.
+
+## Support & Discussions
+
+- **Issues & Bug Reports**: [GitHub Issues](https://github.com/hardikxk/aerc-win/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/hardikxk/aerc-win/discussions)
+- **Upstream Project**: [aerc on SourceHut](https://sr.ht/~rjarry/aerc/)
 
 ## Resources
 
