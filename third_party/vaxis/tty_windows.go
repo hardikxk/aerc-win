@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 	"syscall"
+	"time"
 	"unicode/utf16"
 	"unsafe"
 )
@@ -172,6 +173,10 @@ func (t *windowsTTY) SetRaw() error {
 }
 
 func (t *windowsTTY) Reset() error {
+	// Give Windows console host time to finish processing any pending VT sequences
+	// before removing ENABLE_VIRTUAL_TERMINAL_OUTPUT. Otherwise leftover VT bytes
+	// are printed literally on exit.
+	time.Sleep(20 * time.Millisecond)
 	if err := setConsoleMode(t.in, t.inMode); err != nil {
 		return err
 	}

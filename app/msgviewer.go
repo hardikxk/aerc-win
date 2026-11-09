@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"slices"
 	"strings"
 	"sync/atomic"
@@ -27,6 +28,7 @@ import (
 	"git.sr.ht/~rjarry/go-opt/v2"
 	"go.rockorager.dev/vaxis"
 	"go.rockorager.dev/vaxis/widgets/align"
+	"go.rockorager.dev/vaxis/widgets/pager"
 
 	// Image support
 	_ "image/jpeg"
@@ -475,6 +477,9 @@ type PartViewer struct {
 	width      int
 	height     int
 
+	textPager  *pager.Model
+	rawBody    []byte
+
 	links []string
 }
 
@@ -493,7 +498,12 @@ func NewPartViewer(
 	info := msg.MessageInfo()
 	mime := part.FullMIMEType()
 
+	skipFilters := runtime.GOOS == "windows" && strings.EqualFold(part.MIMEType, "text")
+
 	for _, f := range config.Filters() {
+		if skipFilters {
+			break
+		}
 		switch f.Type {
 		case config.FILTER_MIMETYPE:
 			if fnmatch.Match(f.Filter, mime, 0) {
@@ -585,7 +595,7 @@ func NewPartViewer(
 		term.OnClose = func(error) {
 			SetKeyPassthrough(false)
 		}
-	} else {
+	} else if !skipFilters {
 		noFilter = newNoFilterConfigured(acct.Name(), part)
 	}
 
@@ -627,6 +637,19 @@ func (pv *PartViewer) SetSource(reader io.Reader) {
 	case true:
 		pv.decodeImage()
 	default:
+		if runtime.GOOS == "windows" && pv.filter == nil && strings.EqualFold(pv.part.MIMEType, "text") {
+			go func() {
+				defer log.PanicHandler()
+				defer pv.Invalidate()
+				data, err := io.ReadAll(pv.source)
+				if err != nil {
+					log.Errorf("error reading body part: %v", err)
+					return
+				}
+				pv.rawBody = data
+			}()
+			return
+		}
 		pv.attemptCopy()
 	}
 }
@@ -839,6 +862,9 @@ func (pv *PartViewer) Draw(ctx *ui.Context) {
 	case pv.filter == nil && canInline(pv.part.FullMIMEType()) && pv.err == nil:
 		pv.inlineImg = true
 	case pv.filter == nil:
+		if runtime.GOOS == "windows" && strings.EqualFold(pv.part.MIMEType, "text") {
+			break
+		}
 		// No filter, can't inline, and/or we attempted to inline an image
 		// and resulted in an error (maybe because of a bad encoding or
 		// the terminal doesn't support any graphics protocol).
@@ -847,8 +873,10 @@ func (pv *PartViewer) Draw(ctx *ui.Context) {
 		return
 	case !pv.fetched:
 		w, h := ctx.Window().Size()
-		pv.filter.Env = append(pv.filter.Env, fmt.Sprintf("COLUMNS=%d", w))
-		pv.filter.Env = append(pv.filter.Env, fmt.Sprintf("LINES=%d", h))
+		if pv.filter != nil {
+			pv.filter.Env = append(pv.filter.Env, fmt.Sprintf("COLUMNS=%d", w))
+			pv.filter.Env = append(pv.filter.Env, fmt.Sprintf("LINES=%d", h))
+		}
 	}
 	if !pv.fetched {
 		pv.msg.FetchBodyPart(pv.index, pv.SetSource)
@@ -857,6 +885,23 @@ func (pv *PartViewer) Draw(ctx *ui.Context) {
 	if pv.err != nil {
 		ctx.Fill(0, 0, ctx.Width(), ctx.Height(), ' ', style)
 		ctx.Printf(0, 0, style, "%s", pv.err.Error())
+		return
+	}
+	if runtime.GOOS == "windows" && pv.filter == nil && strings.EqualFold(pv.part.MIMEType, "text") {
+		if pv.rawBody != nil {
+			if pv.textPager == nil {
+				text := string(pv.rawBody)
+				pv.textPager = &pager.Model{
+					Segments: []vaxis.Segment{
+						{
+							Text:  text,
+							Style: style,
+						},
+					},
+				}
+			}
+			pv.textPager.Draw(ctx.Window())
+		}
 		return
 	}
 	if pv.term != nil {
@@ -907,6 +952,32 @@ func (pv *PartViewer) resized(ctx *ui.Context) bool {
 }
 
 func (pv *PartViewer) Event(event vaxis.Event) bool {
+	if pv.textPager != nil {
+		if key, ok := event.(vaxis.Key); ok {
+			switch {
+			case key.Matches('j', 0), key.Matches(vaxis.KeyDown, 0):
+				pv.textPager.ScrollDown()
+				pv.Invalidate()
+				return true
+			case key.Matches('k', 0), key.Matches(vaxis.KeyUp, 0):
+				pv.textPager.ScrollUp()
+				pv.Invalidate()
+				return true
+			case key.Matches('d', vaxis.ModCtrl), key.Matches(vaxis.KeyPgDown, 0):
+				for i := 0; i < 10; i++ {
+					pv.textPager.ScrollDown()
+				}
+				pv.Invalidate()
+				return true
+			case key.Matches('u', vaxis.ModCtrl), key.Matches(vaxis.KeyPgUp, 0):
+				for i := 0; i < 10; i++ {
+					pv.textPager.ScrollUp()
+				}
+				pv.Invalidate()
+				return true
+			}
+		}
+	}
 	if pv.term != nil {
 		defer func() {
 			key, ok := event.(vaxis.Key)
