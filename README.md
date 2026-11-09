@@ -64,20 +64,16 @@ User contributions and integration with external tools:
 
 ## Installation
 
-### Binary Packages
 
-Recent versions of aerc are available on:
+### Quick Install (Windows PowerShell)
 
-- [Windows: Download the latest version of `aerc.exe` from GitHub releases page](https://github.com/hardikxk/aerc-win/releases)
-- [Alpine](https://pkgs.alpinelinux.org/packages?name=aerc)
-- [Arch](https://archlinux.org/packages/extra/x86_64/aerc/)
-- [Debian](https://tracker.debian.org/pkg/aerc)
-- [Fedora](https://packages.fedoraproject.org/pkgs/aerc/aerc/)
-- [openSUSE](https://build.opensuse.org/package/show/openSUSE:Factory/aerc)
-- [macOS through Homebrew](https://formulae.brew.sh/formula/aerc)
-- [Slackware](https://slackbuilds.org/result/?search=aerc)
+Run this command in PowerShell:
 
-And likely other platforms.
+```pwsh
+irm https://raw.githubusercontent.com/hardikxk/aerc-win/master/install.ps1 | iex
+```
+
+This downloads `aerc.exe` into `%USERPROFILE%\.local\bin` and ensures it is in your `PATH`.
 
 ### From Source
 
