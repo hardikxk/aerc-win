@@ -2,7 +2,6 @@
 
 package app
 
-func checkAccessExecutable(path string) error {
+func checkAccessExecutable(_ string) error {
 	return nil
 }
-

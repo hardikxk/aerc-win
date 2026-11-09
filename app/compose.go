@@ -686,7 +686,8 @@ func (c *Composer) GetBody() (*bytes.Buffer, error) {
 	// .eml files must always use '\r\n' line endings
 	buf := new(bytes.Buffer)
 	for scanner.Scan() {
-		buf.WriteString(scanner.Text() + "\r\n")
+		buf.WriteString(scanner.Text())
+		buf.WriteString("\r\n")
 	}
 	err = scanner.Err()
 	if err != nil {
